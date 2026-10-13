@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self';
+           script-src 'self' 'unsafe-inline';
+           style-src 'self' 'unsafe-inline';
+           img-src 'self' data:;
+           font-src 'self' data:;
+           frame-src 'none';
+           connect-src 'none';
+           object-src 'none';
+           base-uri 'self';
+           form-action 'self';">
+<!-- NOTE: Microsoft Forms cannot be embedded in an <iframe> when this page is
+     opened via file:// (or from most non-approved origins) — Forms sends
+     security headers that explicitly block framing from such contexts, and
+     this cannot be overridden from our side. Instead, the survey now opens
+     in a new browser tab, which works reliably regardless of hosting. -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback Survey — Cipla EMEU</title>
+<!-- Google Fonts removed for security (FIX 1) — font-family declarations retained as wishful fallbacks for Cipla-managed devices -->
+<style>
+:root{
+  --teal:#006666;--dark:#002e2e;--gold:#c8902a;
+  --cream:#faf8f4;--warm:#fdfcf9;--border:#d8d3ca;--muted:#6e6e6e;
+  --ok:#2a8c6a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:linear-gradient(160deg,#faf8f4,#f0ede6 50%,#e8e3d9);
+  color:var(--dark);overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(circle at 15% 85%,rgba(0,102,102,.03),transparent 50%),
+             radial-gradient(circle at 85% 15%,rgba(200,144,42,.04),transparent 50%);
+  pointer-events:none;
+}
+
+/* ── SCREENS ── */
+.screen{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  opacity:0;pointer-events:none;
+  transition:opacity .5s,transform .5s;
+  transform:scale(.97);z-index:1;
+  overflow-y:auto;
+}
+.screen.active{opacity:1;pointer-events:all;transform:scale(1)}
+
+/* ── INTRO SCREEN ── */
+.intro{text-align:center}
+.intro-icon{
+  width:80px;height:80px;margin-bottom:18px;
+  animation:fl 3.5s ease-in-out infinite;
+}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.intro-badge{
+  display:inline-block;font-size:.62rem;text-transform:uppercase;
+  letter-spacing:3px;font-weight:700;color:var(--gold);
+  background:rgba(200,144,42,.08);padding:6px 18px;
+  border-radius:20px;margin-bottom:18px;
+}
+.intro h1{
+  font-size:clamp(1.8rem,5.5vw,2.8rem);
+  color:var(--dark);line-height:1.15;margin-bottom:8px;
+}
+.intro h1 span{color:var(--teal)}
+.intro-sub{
+  font-size:clamp(.88rem,2.5vw,1rem);color:var(--muted);
+  max-width:420px;line-height:1.65;margin-bottom:8px;
+}
+.intro-note{
+  font-size:.78rem;color:var(--muted);
+  background:rgba(0,102,102,.04);
+  border:1px solid rgba(0,102,102,.1);
+  border-radius:10px;padding:10px 20px;
+  margin-bottom:28px;max-width:380px;
+  display:flex;align-items:center;gap:8px;
+}
+.intro-note svg{width:16px;height:16px;flex-shrink:0;color:var(--teal)}
+
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 36px;border:none;border-radius:50px;
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-size:.9rem;font-weight:600;cursor:pointer;
+  transition:all .35s cubic-bezier(.22,1,.36,1);
+}
+.btn-p{
+  background:linear-gradient(135deg,var(--teal),#008078);
+  color:#fff;box-shadow:0 6px 24px rgba(0,102,102,.28);
+}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,102,102,.3)}
+.btn-g{
+  background:linear-gradient(135deg,var(--gold),#d9a840);
+  color:#fff;box-shadow:0 6px 24px rgba(200,144,42,.28);
+}
+.btn-g:hover{transform:translateY(-3px)}
+.btn-outline{
+  background:transparent;color:var(--teal);
+  border:1.5px solid var(--teal);
+  box-shadow:none;
+}
+.btn-outline:hover{background:rgba(0,102,102,.05);transform:translateY(-2px)}
+.btn svg{width:18px;height:18px;flex-shrink:0}
+
+/* ── WAITING SCREEN (replaces the old iframe form-screen) ── */
+.wait-screen{text-align:center}
+.wait-icon{
+  width:84px;height:84px;margin-bottom:18px;
+  animation:fl 3.5s ease-in-out infinite;
+}
+.wait-badge{
+  display:inline-block;font-size:.62rem;text-transform:uppercase;
+  letter-spacing:3px;font-weight:700;color:var(--teal);
+  background:rgba(0,102,102,.07);padding:6px 18px;
+  border-radius:20px;margin-bottom:18px;
+}
+.wait-h1{
+  font-size:clamp(1.5rem,4.5vw,2.2rem);
+  color:var(--dark);line-height:1.2;margin-bottom:10px;
+}
+.wait-sub{
+  font-size:.92rem;color:var(--muted);
+  max-width:440px;line-height:1.65;margin-bottom:26px;
+}
+.wait-actions{
+  display:flex;flex-wrap:wrap;gap:12px;
+  justify-content:center;margin-bottom:30px;
+}
+.wait-divider{
+  display:flex;align-items:center;gap:14px;
+  width:100%;max-width:360px;margin-bottom:26px;
+  color:var(--muted);font-size:.72rem;
+  text-transform:uppercase;letter-spacing:1.5px;
+}
+.wait-divider::before,.wait-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.done-panel{
+  background:rgba(42,140,106,.06);
+  border:1px solid rgba(42,140,106,.15);
+  border-radius:16px;
+  padding:20px 28px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  max-width:420px;
+}
+.done-panel-text{
+  font-size:.85rem;color:var(--ok);font-weight:600;
+  display:flex;align-items:center;gap:8px;text-align:left;
+}
+.done-panel-text svg{width:18px;height:18px;flex-shrink:0}
+
+/* ── COMPLETE SCREEN ── */
+.complete{text-align:center}
+.comp-icon{
+  width:90px;height:90px;margin-bottom:18px;
+  animation:fl 3.5s ease-in-out infinite;
+}
+.complete h1{font-size:clamp(1.8rem,5vw,2.5rem);color:var(--dark);margin-bottom:6px}
+.complete h1 span{color:var(--teal)}
+.comp-sub{
+  font-size:.92rem;color:var(--muted);
+  margin-bottom:12px;max-width:400px;line-height:1.6;
+}
+.comp-tagline{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:1rem;font-style:italic;color:var(--gold);margin-top:20px;
+}
+
+/* Confetti */
+.cw{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+.cp{position:absolute;top:-12px;border-radius:2px;animation:cF linear forwards}
+@keyframes cF{0%{transform:translateY(0) rotate(0);opacity:1}85%{opacity:1}100%{transform:translateY(110vh) rotate(800deg);opacity:0}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .wait-actions{flex-direction:column;width:100%;max-width:320px}
+  .wait-actions .btn{width:100%;justify-content:center}
+}
+*:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<!-- ══ INTRO SCREEN ══ -->
+<div class="screen intro active" id="introScreen">
+  <div class="intro-icon">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="12" y="16" width="56" height="48" rx="8" stroke="#006666" stroke-width="3" fill="rgba(0,102,102,.04)"/>
+      <path d="M24 34h32M24 44h22" stroke="#006666" stroke-width="2.5" stroke-linecap="round" opacity=".35"/>
+      <circle cx="58" cy="58" r="14" fill="#c8902a" opacity=".12" stroke="#c8902a" stroke-width="2.5"/>
+      <path d="M54 58h8M58 54v8" stroke="#c8902a" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="intro-badge" id="svBadge">Feedback Survey</div>
+  <h1 id="svH1">Almost <span>There!</span></h1>
+  <p class="intro-sub" id="svSub">You've completed your Cipla EMEU onboarding journey. Take 3 minutes to share your experience — your feedback shapes the next joiner's journey.</p>
+
+  <div class="intro-note">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span id="svNote">Takes about 3 minutes · opens in a new tab</span>
+  </div>
+
+  <button class="btn btn-p" onclick="openForm()">
+    <span id="svStartBtn">Start Survey</span>
+    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<!-- ══ WAITING SCREEN (shown after the survey opens in a new tab) ══ -->
+<div class="screen wait-screen" id="formScreen">
+  <div class="wait-icon">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="20" width="52" height="40" rx="6" stroke="#006666" stroke-width="3" fill="rgba(0,102,102,.04)"/>
+      <path d="M14 30h52" stroke="#006666" stroke-width="2.5"/>
+      <circle cx="20" cy="25" r="1.6" fill="#006666"/>
+      <circle cx="26" cy="25" r="1.6" fill="#006666"/>
+      <circle cx="32" cy="25" r="1.6" fill="#006666"/>
+      <path d="M28 42l7 7 14-15" stroke="#c8902a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div class="wait-badge" id="svWaitBadge">Survey Opened</div>
+  <h1 class="wait-h1" id="svWaitH1">Complete the Survey in the New Tab</h1>
+  <p class="wait-sub" id="svWaitSub">We've opened the Cipla EMEU feedback survey in a new browser tab. Fill it out there, then come back to this tab and click "Complete Journey" below.</p>
+
+  <div class="wait-actions">
+    <button class="btn btn-outline" onclick="openForm()">
+      <span id="svReopenBtn">Reopen Survey</span>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <div class="wait-divider" id="svWaitDivider">Once submitted</div>
+
+  <div class="done-panel">
+    <div class="done-panel-text">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="svDoneText">Submitted your response? Mark your journey complete below.</span>
+    </div>
+    <button class="btn btn-g" id="doneBtn" onclick="completeModule()">
+      <span id="svDoneBtn">Complete Journey ✓</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══ COMPLETE SCREEN ══ -->
+<div class="screen complete" id="completeScreen">
+  <div class="comp-icon">
+    <svg viewBox="0 0 90 90" fill="none">
+      <circle cx="45" cy="45" r="36" stroke="#c8902a" stroke-width="3" fill="rgba(200,144,42,.06)"/>
+      <path d="M30 46l10 10 20-22" stroke="#2a8c6a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <h1 id="svCompH1">Journey <span>Complete!</span></h1>
+  <p class="comp-sub" id="svCompSub">You've completed your Cipla EMEU onboarding. Welcome to the team — you're ready to make an impact.</p>
+  <p class="comp-tagline" id="svTagline">"Caring for life, every step of the way."</p>
+</div>
+
+<script>
+/* ── SURVEY LINK ── */
+/* This opens in a new tab (window.open) instead of an <iframe>, because
+   Microsoft Forms actively blocks being framed from file:// / non-approved
+   origins (a security header on their side, not something fixable from our
+   HTML/CSP). Opening in a new tab works reliably everywhere, hosted or not. */
+const SURVEY_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=n5_95klsVEK46JD7oHPM6-T2GWPQsmtOqzDhOE8YE65UMVRYSjZRTVZRWlZHWFhDSkpSQUtWV0hISC4u";
+
+/* ── LANG SYSTEM ── */
+/* localStorage: stores language preference only — no personal data.
+   Keys used in this file:
+     ciplaLang — language set by parent index.html (en/es/pt/de)
+   No PII is stored. Data remains on the user's own browser and is never transmitted. */
+function getLang(){return localStorage.getItem('ciplaLang')||'en';}
+const SV={
+  en:{
+    badge:'Feedback Survey',h1a:'Almost',h1b:'There!',
+    sub:"You've completed your Cipla EMEU onboarding journey. Take 3 minutes to share your experience — your feedback shapes the next joiner's journey.",
+    note:'Takes about 3 minutes · opens in a new tab',
+    startBtn:'Start Survey',
+    waitBadge:'Survey Opened',
+    waitH1:'Complete the Survey in the New Tab',
+    waitSub:'We\u2019ve opened the Cipla EMEU feedback survey in a new browser tab. Fill it out there, then come back to this tab and click "Complete Journey" below.',
+    reopenBtn:'Reopen Survey',
+    waitDivider:'Once submitted',
+    doneText:"Submitted your response? Mark your journey complete below.",
+    doneBtn:'Complete Journey ✓',
+    compH1a:'Journey',compH1b:'Complete!',
+    compSub:"You've completed your Cipla EMEU onboarding. Welcome to the team — you're ready to make an impact.",
+    tagline:'"Caring for life, every step of the way."'
+  },
+  es:{
+    badge:'Encuesta de Feedback',h1a:'¡Casi',h1b:'Terminado!',
+    sub:'Has completado tu viaje de incorporación en Cipla EMEU. Tómate 3 minutos para compartir tu experiencia — tu opinión mejora el viaje del próximo integrante.',
+    note:'Aprox. 3 minutos · se abre en una pestaña nueva',
+    startBtn:'Iniciar Encuesta',
+    waitBadge:'Encuesta Abierta',
+    waitH1:'Completa la Encuesta en la Nueva Pestaña',
+    waitSub:'Hemos abierto la encuesta de feedback de Cipla EMEU en una nueva pestaña del navegador. Complétala allí y luego vuelve a esta pestaña y haz clic en "Completar Viaje".',
+    reopenBtn:'Reabrir Encuesta',
+    waitDivider:'Una vez enviada',
+    doneText:'¿Enviaste tu respuesta? Marca tu viaje como completo.',
+    doneBtn:'Completar Viaje ✓',
+    compH1a:'¡Viaje',compH1b:'Completo!',
+    compSub:'Has completado tu incorporación en Cipla EMEU. Bienvenido al equipo — estás listo para generar impacto.',
+    tagline:'"Cuidando la vida, a cada paso del camino."'
+  },
+  pt:{
+    badge:'Pesquisa de Feedback',h1a:'Quase',h1b:'Lá!',
+    sub:'Você concluiu sua jornada de integração na Cipla EMEU. Reserve 3 minutos para compartilhar sua experiência — seu feedback molda a jornada do próximo colaborador.',
+    note:'Cerca de 3 minutos · abre em uma nova aba',
+    startBtn:'Iniciar Pesquisa',
+    waitBadge:'Pesquisa Aberta',
+    waitH1:'Conclua a Pesquisa na Nova Aba',
+    waitSub:'Abrimos a pesquisa de feedback da Cipla EMEU em uma nova aba do navegador. Preencha-a lá e depois volte a esta aba e clique em "Concluir Jornada".',
+    reopenBtn:'Reabrir Pesquisa',
+    waitDivider:'Após o envio',
+    doneText:'Enviou sua resposta? Marque sua jornada como concluída.',
+    doneBtn:'Concluir Jornada ✓',
+    compH1a:'Jornada',compH1b:'Concluída!',
+    compSub:'Você concluiu sua integração na Cipla EMEU. Bem-vindo à equipe — você está pronto para causar impacto.',
+    tagline:'"Cuidando da vida, a cada passo do caminho."'
+  },
+  de:{
+    badge:'Feedback-Umfrage',h1a:'Fast',h1b:'Geschafft!',
+    sub:'Sie haben Ihre Cipla EMEU-Einarbeitung abgeschlossen. Nehmen Sie sich 3 Minuten, um Ihre Erfahrungen zu teilen — Ihr Feedback verbessert die Reise des nächsten Mitarbeiters.',
+    note:'Ca. 3 Minuten · öffnet in neuem Tab',
+    startBtn:'Umfrage starten',
+    waitBadge:'Umfrage Geöffnet',
+    waitH1:'Umfrage im neuen Tab abschließen',
+    waitSub:'Wir haben die Cipla EMEU-Feedback-Umfrage in einem neuen Browser-Tab geöffnet. Füllen Sie sie dort aus und kehren Sie dann zu diesem Tab zurück, um auf "Reise abschließen" zu klicken.',
+    reopenBtn:'Umfrage erneut öffnen',
+    waitDivider:'Nach dem Absenden',
+    doneText:'Antwort abgeschickt? Markieren Sie Ihre Reise unten als abgeschlossen.',
+    doneBtn:'Reise abschließen ✓',
+    compH1a:'Reise',compH1b:'Abgeschlossen!',
+    compSub:'Sie haben Ihre Cipla EMEU-Einarbeitung abgeschlossen. Willkommen im Team — Sie sind bereit, einen Beitrag zu leisten.',
+    tagline:'"Das Leben pflegen, Schritt für Schritt."'
+  }
+};
+
+function applyLangSV(){
+  const L=SV[getLang()]||SV.en;
+  const s=id=>document.getElementById(id);
+  const set=(id,v)=>{const e=s(id);if(e)e.textContent=v;};
+  const setH=(id,v)=>{const e=s(id);if(e)e.innerHTML=v;}; /* controlled template — XSS-safe: values are from hard-coded SV translations object only */
+  set('svBadge',L.badge);
+  setH('svH1',L.h1a+' <span>'+L.h1b+'</span>');
+  set('svSub',L.sub);
+  set('svNote',L.note);
+  set('svStartBtn',L.startBtn);
+  set('svWaitBadge',L.waitBadge);
+  set('svWaitH1',L.waitH1);
+  set('svWaitSub',L.waitSub);
+  set('svReopenBtn',L.reopenBtn);
+  set('svWaitDivider',L.waitDivider);
+  set('svDoneText',L.doneText);
+  set('svDoneBtn',L.doneBtn);
+  setH('svCompH1',L.compH1a+' <span>'+L.compH1b+'</span>');
+  set('svCompSub',L.compSub);
+  set('svTagline',L.tagline);
+}
+
+/* ── SCREENS ── */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ── OPEN FORM (new tab, not iframe) ── */
+function openForm(){
+  window.open(SURVEY_URL, '_blank', 'noopener,noreferrer');
+  showScreen('formScreen');
+}
+
+/* ── COMPLETE MODULE ── */
+function completeModule(){
+  /* SECURITY: targetOrigin restricts to same origin only.
+     UPDATE THIS ORIGIN WHEN HOSTING DOMAIN CHANGES — verify window.location.origin
+     resolves correctly after migrating from GitHub Pages to Cipla internal infrastructure. */
+  window.parent.postMessage({type:"MODULE_COMPLETED",module:"module8"},window.location.origin);
+  const btn=document.getElementById('doneBtn');
+  btn.innerHTML='<span>✓ Done!</span>';
+  btn.style.pointerEvents='none';
+  btn.style.background='linear-gradient(135deg,#2a8c6a,#34b87e)';
+  setTimeout(()=>{showScreen('completeScreen');confetti(60);},600);
+}
+
+/* ── CONFETTI ── */
+function confetti(n){
+  const w=document.createElement('div');w.className='cw';document.body.appendChild(w);
+  const cols=['#006666','#c8902a','#e8b960','#2a8c6a','#fff','#d8d3ca'];
+  for(let i=0;i<n;i++){
+    const p=document.createElement('div');p.className='cp';
+    p.style.left=Math.random()*100+'%';
+    p.style.background=cols[Math.floor(Math.random()*cols.length)];
+    p.style.width=(5+Math.random()*8)+'px';
+    p.style.height=(5+Math.random()*8)+'px';
+    p.style.borderRadius=Math.random()>.5?'50%':'2px';
+    p.style.animationDuration=(1.6+Math.random()*1.4)+'s';
+    p.style.animationDelay=Math.random()*.7+'s';
+    w.appendChild(p);
+  }
+  setTimeout(()=>w.remove(),3800);
+}
+
+document.addEventListener('DOMContentLoaded', applyLangSV);
+
+/* Listen for language change from parent index.html (postMessage protocol).
+   SECURITY: origin check rejects messages from any domain other than this page's own origin.
+   UPDATE THIS ORIGIN WHEN HOSTING DOMAIN CHANGES — re-test after migration to Cipla infrastructure. */
+window.addEventListener('message', function(e){
+  if(e.origin !== window.location.origin) return;
+  if(e.data && e.data.type === 'LANG_CHANGE'){
+    applyLangSV();
+  }
+});
+</script>
+</body>
+</html>
